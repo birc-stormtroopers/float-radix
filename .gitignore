@@ -50,3 +50,13 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+rsort_test
+Testing
+build
+.vscode
+CMakeCache.txt
+CMakeFiles
+CTestTestfile.cmake
+Makefile
+checks.json
+cmake_install.cmake
