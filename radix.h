@@ -10,7 +10,8 @@ typedef double float64_t;
 _Static_assert(sizeof(uint64_t) == sizeof(float64_t),
                "These should have the same size.");
 
-void rsort_int64(size_t n, uint64_t keys[n]);
+void rsort_uint64(size_t n, uint64_t keys[n]);
+void rsort_int64(size_t n, int64_t keys[n]);
 void rsort_float64(size_t n, float64_t keys[n]);
 
 #endif // RADIX_H
