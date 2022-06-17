@@ -211,8 +211,12 @@ $$(-1)^s \times 2^{1-1023} \times 0.b_{51}b_{50}\ldots b_1b_0$$
 
 which places the numbers in the smallest interval around zero where we don't have a positive exponent, but uniformly placed. The bit patterns in the fraction still sort correctly, though, and the transformation based on the sign bit orders them correctly.
 
+If we have the highest exponent, `0x7ff`, we will place number at the top of the array sorted as bit patterns and sign corrected if the sign bit is zero, or we will place it at the beginning of the array if the sign bit is set, and in those chunks we will have the numbers sorted by the fraction part. But the interpretation of the number is not as a normal number. If the fraction is zero, the number is interpreted as plus or minus infinity (depending on sign bit). So `0x7ff frac=0` is $+\infty$
+while `- 0x7ff frac=0` is $+\infty$.
 
+With our sorting and sign correction, these two values will be at the bottom (for minus infinity) and top (for plus infinity) if all other numbers with the largest exponent were thrown away. Top and bottom is where we want them, so that is fine, *if* `frac > 0` were always thrown away in these cases, but if there are non-zero fractions with maximal exponent the numbers would come before and after infinity. Is that a problem? Well, maybe not. Because if the exponent is `0x7ff` and the fraction is non-zero, the number is interpreted as `NAN` (not a number), and we can't sort those anyway.
 
+We won't "sort" the `NAN`, but sorting the floats as bits will put them at the beginning or the end of the array.
 
 To sum up, if we sort 64-bit floating point numbers in IEEE 754, we can sort them as 64-bit unsigned integers, but then we need to rotate the negative numbers up front to get the sign ordered, and then we need to reverse the negative numbers to get them in order.[^1]
 

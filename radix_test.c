@@ -80,7 +80,7 @@ static void test_rsort_float(void)
 
     for (int rep = 0; rep < 5; rep++)
     {
-        keys[0] = nan(0);
+        keys[0] = -nan(0);
         for (size_t i = 1; i < m; i++)
             keys[0 * m + i] = rand_float();
 
@@ -98,12 +98,18 @@ static void test_rsort_float(void)
 
         rsort_float64(n, keys);
 
-        for (size_t i = 1; i < n - 2; i++)
+        for (size_t i = 0; i < n; i++)
+        {
+            printf("%lg\n", keys[i]);
+        }
+
+        // The "negative" nan should go first
+        assert(isnan(keys[0]));
+        for (size_t i = 2; i < n - 2; i++)
         {
             assert(keys[i - 1] <= keys[i]);
         }
-        // the two NANs go last
-        assert(isnan(keys[n - 2]));
+        // The positive last
         assert(isnan(keys[n - 1]));
     }
 }
