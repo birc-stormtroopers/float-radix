@@ -170,6 +170,18 @@ Now that we're comfortable with the idea of sorting keys as unsigned integers an
 
 The standard representation for floating point numbers today is [IEEE 754](https://en.wikipedia.org/wiki/IEEE_754#2019). It is a bit complicated, as most standards are, especially because it allows decimal floats, which is just crazy and a lot harder to work with than binary numbers. If those decimal floats are used anywhere, I don't know, but I plan to live a long and happy life ignoring their existance.
 
+For a binary float, you have a sign bit, $s$,
+then some bits for an exponent, $e$,
+which in 64-bit floats is 11 bits, and finally some "fraction"bits, for 64-bit floats there are 52: $b_0,b_1,\ldots,b_51$.
+
+![Bit representation of a float.](figs/figs/float.png)
+
+The interpretation is this:
+
+$$x = (-1)^s \left(1 + \sum_{i=1}^{52} b_{52-i}2^{-i}\right) \times 2^{e-1023}$$
+
+
+
 **FIXME: description of a float representation**
 
 **FIXME: describe why we can just sort them as bit patterns**
