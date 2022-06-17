@@ -75,6 +75,28 @@ If we were to sort signed 64-bit integers instead, we would run into a problem. 
 
 Other than that, though, the negative numbers would still be correctly sorted. The negative numbers in two's compliment are still ordered such that if `i < j` then the bit patterns interpreted as unsigned integers would also be ordered `i < j`. It is only that the negative numbers come after the positive.
 
+The 4-bit unsigned and two's complement integers:
+
+```
+Bits  Unsigned  Signed
+0000         0       0
+0001         1       1
+0010         2       2
+0011         3       3
+0100         4       4
+0101         5       5
+0110         6       6
+0111         7       7
+1000         8      -8 (-8 = ~8 + 1 = ~1000 + 1 = 0111 + 1 = 1000)
+1001         9      -7 (-7 = ~7 + 1 = ~0111 + 1 = 1000 + 1 = 1001)
+1010        10      -6 (-6 = ~6 + 1 = ~0110 + 1 = 1001 + 1 = 1010)
+1011        11      -5 (-5 = ~5 + 1 = ~0101 + 1 = 1010 + 1 = 1011)
+1100        12      -4 (-4 = ~4 + 1 = ~0100 + 1 = 1011 + 1 = 1100)
+1101        13      -3 (-3 = ~3 + 1 = ~0011 + 1 = 1100 + 1 = 1101)
+1110        14      -2 (-2 = ~2 + 1 = ~0010 + 1 = 1101 + 1 = 1110)
+1111        15      -1 (-1 = ~1 + 1 = ~0001 + 1 = 1110 + 1 = 1111)
+```
+
 We can fix that by rotating the array after we have sorted it, so the negative numbers are moved to the front and the positive numbers are put after.
 
 **FIXME: figure here**
@@ -126,6 +148,8 @@ static uint64_t *first_neg(uint64_t *from, uint64_t *to)
     return from;
 }
 ```
+
+If you don't need (relatively) generic code, you can just us `x < 0` for integers or `signbit()` for floats (where `x < 0` won't work, since `-0` is a thing for floats).
 
 With a sorting function for unsigned 64-bit integers and the rotation functionality, the sorting routine for signed integers practically writes itself:
 

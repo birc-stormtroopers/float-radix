@@ -1,6 +1,7 @@
 #include "radix.h"
 #include <assert.h>
 #include <float.h>
+#include <math.h>
 #include <stdio.h>
 
 static void test_rsort_uint(void)
@@ -74,31 +75,36 @@ static float64_t rand_float(void)
 static void test_rsort_float(void)
 {
     size_t m = 5, k = 3;
-    size_t n = k * m + 2; // +2 for +/- inf
+    size_t n = k * m + 3; // +2 for +/- inf + 1 for nan
     float64_t keys[n];
 
     for (int rep = 0; rep < 5; rep++)
     {
-        for (size_t i = 0; i < m; i++)
+        keys[0] = nan(0);
+        for (size_t i = 1; i < m; i++)
             keys[0 * m + i] = rand_float();
 
         keys[1 * m] = 0.0; // get zero in there
         for (size_t i = 1; i < m; i++)
-            keys[1 * m + i] = rand_float(); // [0,1)
+            keys[1 * m + i] = rand_float();
 
         keys[2 * m] = -0.0; // get negative zero in there
         for (size_t i = 1; i < m; i++)
-            keys[2 * m + i] = rand_float(); // [-1,0)
+            keys[2 * m + i] = rand_float();
 
-        keys[n - 2] = LDBL_MAX;  // inf
-        keys[n - 1] = -LDBL_MAX; // -inf
+        keys[n - 3] = INFINITY;
+        keys[n - 2] = -INFINITY;
+        keys[n - 1] = nan(0);
 
         rsort_float64(n, keys);
 
-        for (size_t i = 1; i < n; i++)
+        for (size_t i = 1; i < n - 2; i++)
         {
             assert(keys[i - 1] <= keys[i]);
         }
+        // the two NANs go last
+        assert(isnan(keys[n - 2]));
+        assert(isnan(keys[n - 1]));
     }
 }
 
