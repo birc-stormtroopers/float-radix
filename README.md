@@ -180,15 +180,16 @@ The interpretation is this:
 
 $$x = (-1)^s \left(1 + \sum_{i=1}^{52} b_{52-i}2^{-i}\right) \times 2^{e-1023}$$
 
+There are some special cases. The smallest number is interpreted as minus infinity and the largest as infinity, all set bits is "not a number" `nan`, and the numbers closest to zero, where $2^{e-1023} = 2^0 = 1$ are handled differently, but none of this matters for us. We don't care about `nan` since we can't sort those anyway, and as bit patterns they end up at the end which is just a fine place for them as any. The plus and minus infinities will end up at the beginning and end (ignoring `nan`) which is where they belong. And if we handle the bit patterns correctly, we we will handle correctly that there is both a plus and minus zero.
 
+Anyway, I am getting ahead of myself.
 
-**FIXME: description of a float representation**
+Consider this as a bit pattern and how floats would sort as such. And ignore the sign bit at first.
 
-**FIXME: describe why we can just sort them as bit patterns**
+If we sort such a bit pattern, the higher bits are the main keys, which would mean that the exponent matters more than the fractions. That is exactly what we want since $2^a < 2^b$
+when $a < b$. After the exponent, the bit pattern will be sorted with respect to the fraction, which is also exactly what we want. So, for positive numbers, it seems that we can just sort floats as we would unsigned bit patterns.
 
-**FIXME: describe the transformation we need to do**
-
-If the exponent comes before the fraction in the representation, then we sort by magnitude and then fraction if we sort floats as bit-patterns, and that means that we are almost there if we just sort our array as unsigned ints. But the sign bit will still put negative numbers after the positive numbers, so we need a rotation to get the negative numbers first and the positive numbers second. With two's-complement integers, that woudl be enough to get all the values in order, but with floats we don't have two's-complement. The sign bit is just a sign bit. So the negative numbers go
+But the sign bit will still put negative numbers after the positive numbers, so we need a rotation to get the negative numbers first and the positive numbers second. With two's-complement integers, that woudl be enough to get all the values in order, but with floats we don't have two's-complement. The sign bit is just a sign bit. So the negative numbers go
 
 ```
 -0:   1 ... 00000
