@@ -99,11 +99,12 @@ Bits  Unsigned  Signed
 
 We can fix that by rotating the array after we have sorted it, so the negative numbers are moved to the front and the positive numbers are put after.
 
-**FIXME: figure here**
+![Rotation.](figs/figs/rotation.png)
 
 The easiest way to rotate an array in-place (thus saving some memory) is using reversal. You can reverse the whole array, and then reverse the two parts you are rotating, and, presto, you have rotated the array.
 
-**FIXME: figure here**
+![Rotation using reversal.](figs/figs/rotation-with-reversal.png)
+
 
 Both operations are straightforward to implement:
 
