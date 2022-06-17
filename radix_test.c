@@ -107,8 +107,6 @@ static void test_rsort_float(void)
         // The positive last
         assert(isnan(keys[n - 1]));
     }
-
-    printf("%d\n", (int)42.0);
 }
 
 int main(void)
