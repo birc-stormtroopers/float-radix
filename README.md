@@ -212,7 +212,7 @@ $$(-1)^s \times 2^{1-1023} \times 0.b_{51}b_{50}\ldots b_1b_0$$
 which places the numbers in the smallest interval around zero where we don't have a positive exponent, but uniformly placed. The bit patterns in the fraction still sort correctly, though, and the transformation based on the sign bit orders them correctly.
 
 If we have the highest exponent, `0x7ff`, we will place number at the top of the array sorted as bit patterns and sign corrected if the sign bit is zero, or we will place it at the beginning of the array if the sign bit is set, and in those chunks we will have the numbers sorted by the fraction part. But the interpretation of the number is not as a normal number. If the fraction is zero, the number is interpreted as plus or minus infinity (depending on sign bit). So `0x7ff frac=0` is $+\infty$
-while `- 0x7ff frac=0` is $+\infty$.
+while `- 0x7ff frac=0` is $-\infty$.
 
 With our sorting and sign correction, these two values will be at the bottom (for minus infinity) and top (for plus infinity) if all other numbers with the largest exponent were thrown away. Top and bottom is where we want them, so that is fine, *if* `frac > 0` were always thrown away in these cases, but if there are non-zero fractions with maximal exponent the numbers would come before and after infinity. Is that a problem? Well, maybe not. Because if the exponent is `0x7ff` and the fraction is non-zero, the number is interpreted as `NAN` (not a number), and we can't sort those anyway.
 
@@ -242,7 +242,39 @@ A word of warning on casting is in order her. I am casting an array of `float64_
 
 This is what I want here, but it is not always what a cast will give me. And for good reasons.
 
-**FIXME: more here**
+If you have a float and you cast it into an integer, you probably want the integer representation of the same number.[^2]
+
+```c
+    // You would expect this to print 42, I bet
+    printf("%d\n", (int)42.0);
+```
+
+and that is also what you get. But the bit pattern for 42 and the float 42.0 are very different.
+
+If you want the *bit pattern* of a float interpreted as an integer, you can't use this cast. In C++ they distinguish between casting values (as the `(int)42.0` example above) and bit patterns (getting the same bit pattern but interpreted in a different way), with `reinterpret_cast` being the latter. In C we don't have that, but we have a cheat that will work. If we cast a pointer,[^3] C won't interpret the value we are pointing at, but just give us a new pointer. When we then look through that pointer we see the data in the new interpretation.
+
+If you have a variable `x` containing a value of one type, you can get a pointer to the data by taking the address of `x`, `&x`. If you cast that to a different pointer type, `(T*)&x`, you have a pointer that will interpret the bit patterns in `x` as the new type, and if you dereference it, `*(T*)&x`, you get the value in the new interpretation.
+
+For casting `uint64_t` to `float64_t`, it can look like this:
+
+```c
+static inline float64_t cast_itof(uint64_t i)
+{
+    return *(float64_t *)&i;
+}
+```
+
+This is rather C specific, though, but other languages have similar ways of converting numbers that won't necessarily preserve the bit patterns, so if it is the bit pattern you want, be ware.
+
+Anyway, it wasn't a problem in our sorting algorithm because we went through pointers anyway, so it was just a gentle warning that things will not always behave this way when we work on raw bits.
+
+Anyway, now you know how to radix sort signed integers and floats as well as unsigned bit patterns.
+
+
 
 
 [^1]: If you are sorting more complicated values, and the floats are just keys, this last reversal will be unstable. You are reversing the values compared to the order they had in the input. To fix this, you will have to run through the negative numbers and for each block of identical keys you need to reverse the block. That brings the algorithm back to a stable sort.
+
+[^2]: The floating point representation is chosen such that if you use a larger word size for floats you have all the integers from a smaller word size explicitly represented. That is, if you use 32-bit integers, than those integers are all explicitly represented in 64-bit floats, no rounding required. But the integers are not represented as the same patterns.
+
+[^3]: The C standard doesn't allow for all kinds of pointer casts, but I've never seen an implementation where we can't the way I do. If you run into such a beast, you can cast the address to a `void *` pointer and then to the desired pointer type. That is guaranteed by the standard to work.

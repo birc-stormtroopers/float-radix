@@ -98,11 +98,6 @@ static void test_rsort_float(void)
 
         rsort_float64(n, keys);
 
-        for (size_t i = 0; i < n; i++)
-        {
-            printf("%lg\n", keys[i]);
-        }
-
         // The "negative" nan should go first
         assert(isnan(keys[0]));
         for (size_t i = 2; i < n - 2; i++)
@@ -112,6 +107,8 @@ static void test_rsort_float(void)
         // The positive last
         assert(isnan(keys[n - 1]));
     }
+
+    printf("%d\n", (int)42.0);
 }
 
 int main(void)
