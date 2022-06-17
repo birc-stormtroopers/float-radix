@@ -180,16 +180,14 @@ The interpretation is this:
 
 $$x = (-1)^s \left(1 + \sum_{i=1}^{52} b_{52-i}2^{-i}\right) \times 2^{e-1023}$$
 
-There are some special cases. The smallest number is interpreted as minus infinity and the largest as infinity, all set bits is "not a number" `nan`, and the numbers closest to zero, where $2^{e-1023} = 2^0 = 1$ are handled differently, but none of this matters for us. We don't care about `nan` since we can't sort those anyway, and as bit patterns they end up at the end which is just a fine place for them as any. The plus and minus infinities will end up at the beginning and end (ignoring `nan`) which is where they belong. And if we handle the bit patterns correctly, we we will handle correctly that there is both a plus and minus zero.
+There are some special cases, some of which we can ignore and some of which we have to deal with.
 
-Anyway, I am getting ahead of myself.
-
-Consider this as a bit pattern and how floats would sort as such. And ignore the sign bit at first.
+First, if we just consider this a bit pattern and ignore the sign bit (i.e., we are working with positive numbers and positive zero), we can just sort floats as if they were bit patterns.
 
 If we sort such a bit pattern, the higher bits are the main keys, which would mean that the exponent matters more than the fractions. That is exactly what we want since $2^a < 2^b$
-when $a < b$. After the exponent, the bit pattern will be sorted with respect to the fraction, which is also exactly what we want. So, for positive numbers, it seems that we can just sort floats as we would unsigned bit patterns.
+when $a < b$. After the exponent, the bit pattern will be sorted with respect to the fraction, which is also exactly what we want.
 
-But the sign bit will still put negative numbers after the positive numbers, so we need a rotation to get the negative numbers first and the positive numbers second. With two's-complement integers, that woudl be enough to get all the values in order, but with floats we don't have two's-complement. The sign bit is just a sign bit. So the negative numbers go
+If we then add the sign bit to the equation, we have a little more work to do. The sign bit will put negative numbers after the positive numbers, so we need a rotation to get the negative numbers first and the positive numbers second. With two's-complement integers, that woudl be enough to get all the values in order, but with floats we don't have two's-complement. The sign bit is just a sign bit. So the negative numbers go
 
 ```
 -0:   1 ... 00000
@@ -202,6 +200,19 @@ But the sign bit will still put negative numbers after the positive numbers, so 
 which, when sorted as bit-patterns, would put the negative numbers in reverse.
 
 No problem, though, we have a function for reversing parts of an array and we are not afraid to use it.
+
+Then there are some special interpretations of bit patterns that are not directly translated with the formula above. These are encoded in the exponent.
+
+The smallest exponent is (obviously) zero `0x000` and the highest is `0x7ff`. When the exponent is zero, the other bits are potentially interpreted differently. If the sign bit is set and the fraction is all zeros, the number is interpreted as negative zero (-0). So `-0 = 0b100...0000`. As a bit pattern, that is the smallest number with the sign bit set, and with our transformations this will place it right before 0, which is a fine place for negative zero. No problem there.
+
+When the exponent is zero and the fraction is non-zero we get what is called "subnormal" numbers. It is just a different interpretation of the fractions. Now the number is interpreted as
+
+$$(-1)^s \times 2^{1-1023} \times 0.b_{51}b_{50}\ldots b_1b_0$$
+
+which places the numbers in the smallest interval around zero where we don't have a positive exponent, but uniformly placed. The bit patterns in the fraction still sort correctly, though, and the transformation based on the sign bit orders them correctly.
+
+
+
 
 To sum up, if we sort 64-bit floating point numbers in IEEE 754, we can sort them as 64-bit unsigned integers, but then we need to rotate the negative numbers up front to get the sign ordered, and then we need to reverse the negative numbers to get them in order.[^1]
 
