@@ -172,7 +172,7 @@ The standard representation for floating point numbers today is [IEEE 754](https
 
 For a binary float, you have a sign bit, $s$,
 then some bits for an exponent, $e$,
-which in 64-bit floats is 11 bits, and finally some "fraction"bits, for 64-bit floats there are 52: $b_0,b_1,\ldots,b_51$.
+which in 64-bit floats is 11 bits, and finally some "fraction"bits, for 64-bit floats there are 52: $b_{51},b_{50},\ldots,b_1,b_0$.
 
 ![Bit representation of a float.](figs/figs/float.png)
 
